@@ -7,11 +7,15 @@ services:
     environment:
       PASEO_PASSWORD: "${PASEO_PASSWORD}"
       PASEO_HOSTNAMES: "${PASEO_HOSTNAMES}"
+      PASEO_TRUSTED_PROXIES: "${PASEO_TRUSTED_PROXIES:-loopback,172.16.0.0/12}"
+      PASEO_SERVICE_PROXY_LISTEN: "${PASEO_SERVICE_PROXY_LISTEN:-0.0.0.0:8080}"
+      PASEO_SERVICE_PROXY_PUBLIC_BASE_URL: "${PASEO_SERVICE_PROXY_PUBLIC_BASE_URL}"
       NINEROUTER_BASE_URL: "${NINEROUTER_BASE_URL}"
       NINEROUTER_API_KEY: "${NINEROUTER_API_KEY}"
       OPENCODE_CONFIG: "/etc/opencode/opencode.json"
     expose:
       - "6767"
+      - "8080"
     volumes:
       - paseo_home:/home/paseo
       - paseo_workspace:/workspace

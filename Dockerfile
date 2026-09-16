@@ -9,7 +9,7 @@ RUN set -eux; \
     apt-get install -y --no-install-recommends gh; \
     rm -rf /var/lib/apt/lists/*; \
     mkdir -p "$NPM_CONFIG_CACHE"; \
-    npm install -g opencode-ai; \
+    npm install -g opencode-ai bun@1.4.2; \
     chown -R paseo:paseo /home/paseo
 
 COPY --chown=paseo:paseo opencode.json /etc/opencode/opencode.json

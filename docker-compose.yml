@@ -7,6 +7,8 @@ services:
     environment:
       PASEO_PASSWORD: "${PASEO_PASSWORD}"
       PASEO_HOSTNAMES: "${PASEO_HOSTNAMES}"
+      NINEROUTER_BASE_URL: "${NINEROUTER_BASE_URL:-https://router.rstu.my.id/v1}"
+      NINEROUTER_API_KEY: "${NINEROUTER_API_KEY}"
     expose:
       - "6767"
     volumes:

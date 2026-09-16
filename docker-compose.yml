@@ -1,0 +1,18 @@
+services:
+  paseo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      PASEO_PASSWORD: "${PASEO_PASSWORD}"
+      PASEO_HOSTNAMES: "${PASEO_HOSTNAMES}"
+    expose:
+      - "6767"
+    volumes:
+      - paseo_home:/home/paseo
+      - paseo_workspace:/workspace
+
+volumes:
+  paseo_home:
+  paseo_workspace:

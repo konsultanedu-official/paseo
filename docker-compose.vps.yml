@@ -1,0 +1,42 @@
+services:
+  paseo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      # The daemon listens inside the container, while Docker publishes it only
+      # to VPS loopback for Paseo Desktop's SSH transport.
+      PASEO_LISTEN: "0.0.0.0:6767"
+      PASEO_WEB_UI_ENABLED: "false"
+
+      # Optional workspace service proxy for dev previews. Keep it loopback-only
+      # on the VPS and publish it through a separate trusted reverse proxy/tunnel.
+      PASEO_SERVICE_PROXY_LISTEN: "${PASEO_SERVICE_PROXY_LISTEN:-0.0.0.0:8080}"
+      PASEO_SERVICE_PROXY_PUBLIC_BASE_URL: "${PASEO_SERVICE_PROXY_PUBLIC_BASE_URL:-}"
+      PASEO_HOSTNAMES: "${PASEO_HOSTNAMES:-localhost,127.0.0.1}"
+      PASEO_TRUSTED_PROXIES: "${PASEO_TRUSTED_PROXIES:-loopback,172.16.0.0/12}"
+
+      # Model gateway / OpenCode runtime.
+      NINEROUTER_BASE_URL: "${NINEROUTER_BASE_URL}"
+      NINEROUTER_API_KEY: "${NINEROUTER_API_KEY}"
+      OPENCODE_CONFIG: "/etc/opencode/opencode.json"
+
+      # Optional Vite wildcard preview allowlist, e.g. .dev.example.com
+      __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS: "${__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS:-}"
+
+    ports:
+      # Paseo control plane: reachable only from the VPS itself. Paseo Desktop
+      # reaches this through native SSH transport (ssh -W 127.0.0.1:6767 ...).
+      - "127.0.0.1:6767:6767"
+
+      # Preview/service proxy. A host reverse proxy or tunnel may publish this.
+      - "127.0.0.1:18080:8080"
+
+    volumes:
+      - paseo_home:/home/paseo
+      - paseo_workspace:/workspace
+
+volumes:
+  paseo_home:
+  paseo_workspace:

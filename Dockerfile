@@ -11,7 +11,7 @@ RUN set -eux; \
     NPM_CONFIG_CACHE=/tmp/npm-cache npm install -g opencode-ai bun@1.4.2; \
     rm -rf /tmp/npm-cache
 
-COPY --chown=paseo:paseo opencode.json /etc/opencode/opencode.json
+COPY --chown=paseo:paseo opencode*.json /etc/opencode/
 COPY paseo-runtime-entrypoint.sh /usr/local/bin/paseo-runtime-entrypoint
 
 RUN chmod 0755 /usr/local/bin/paseo-runtime-entrypoint

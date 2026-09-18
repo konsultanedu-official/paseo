@@ -33,7 +33,7 @@ services:
       # Model gateway / OpenCode runtime.
       NINEROUTER_BASE_URL: "${NINEROUTER_BASE_URL}"
       NINEROUTER_API_KEY: "${NINEROUTER_API_KEY}"
-      OPENCODE_CONFIG: "/etc/opencode/opencode.json"
+      OPENCODE_CONFIG: "/etc/opencode/opencode.vps.json"
 
       # Optional Vite wildcard preview allowlist, e.g. .dev.example.com
       __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS: "${__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS:-}"

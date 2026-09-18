@@ -7,14 +7,15 @@ This profile is intended for a Linux VPS (including aaPanel-managed Docker) wher
 ```text
 Windows 11
   Paseo Desktop
-    |-- SSH transport --------------------------> VPS 127.0.0.1:6767 -> Paseo daemon
+    |-- E2EE relay via relay.paseo.sh:443 ------> Paseo daemon
     `-- local browser tabs / browser automation
 
 VPS
   Docker: Paseo daemon + OpenCode + Git + gh + Bun + ripgrep
   /home/paseo   persistent runtime/config/skills/credentials
   /workspace    persistent repositories/worktrees
-  127.0.0.1:6767  daemon control plane (not public)
+  outbound 443    official Paseo relay (primary control transport)
+  127.0.0.1:6767 daemon control plane (local health/debug + SSH fallback only)
   127.0.0.1:18080 service proxy (publish separately only when previews are needed)
 ```
 
@@ -31,9 +32,12 @@ docker compose -f docker-compose.vps.yml up -d --build
 Required environment variables:
 
 ```env
+PASEO_PASSWORD=...
 NINEROUTER_BASE_URL=...
 NINEROUTER_API_KEY=...
 ```
+
+Copy `.env.example` to `.env`, replace the placeholders, and keep `.env` root-readable only. The repository ignores `.env`.
 
 Optional preview variables:
 
@@ -43,13 +47,23 @@ PASEO_HOSTNAMES=localhost,127.0.0.1,.dev.example.com
 __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS=.dev.example.com
 ```
 
-Do not publish TCP 6767 on `0.0.0.0`. The compose profile binds it only to VPS loopback so Desktop can reach it through SSH.
-
-If the VPS is shared with untrusted local shell users, add daemon password authentication after verifying the Desktop SSH connection flow in the installed Paseo Desktop version. For a single-user VPS, loopback binding plus SSH key authentication is the primary boundary.
+Do not publish TCP 6767 on `0.0.0.0`. The compose profile binds it only to VPS loopback. Desktop should normally connect through Paseo's end-to-end encrypted relay; loopback 6767 remains available for local health/debug and SSH fallback. Keep `PASEO_PASSWORD` enabled as defense in depth for direct/loopback access.
 
 ## Windows 11 -> VPS through Paseo Desktop
 
-Paseo Desktop supports a native Remote SSH host. The SSH transport uses non-interactive OpenSSH (`BatchMode=yes`), so configure key-based login first.
+Primary transport is Paseo Relay. The VPS daemon connects outbound to the official relay on TCP 443, and Paseo Desktop meets it there using Paseo's end-to-end encrypted pairing flow. No public daemon port, reverse proxy, or VPS public-IP connection is required.
+
+After the daemon is running, enable relay and generate a pairing offer:
+
+```bash
+docker compose -f docker-compose.vps.yml exec paseo gosu paseo paseo daemon pair --relay
+```
+
+Use the resulting pairing offer/QR in Paseo Desktop. The relay setting and daemon identity live under persistent `/home/paseo`, so preserve the `paseo_home` volume across container recreation.
+
+### SSH fallback
+
+Paseo Desktop also supports a native Remote SSH host. Keep this as an administrative/recovery path. The SSH transport uses non-interactive OpenSSH (`BatchMode=yes`), so configure key-based login first.
 
 From Windows PowerShell:
 
@@ -204,7 +218,8 @@ Keep the control plane and preview plane separate:
 
 ```text
 Control:
-Paseo Desktop -> SSH -> VPS 127.0.0.1:6767
+Paseo Desktop -> E2EE Paseo Relay -> daemon
+Fallback: Paseo Desktop -> SSH -> VPS 127.0.0.1:6767
 
 Preview:
 Browser -> HTTPS wildcard -> reverse proxy / Cloudflare Tunnel
@@ -230,7 +245,7 @@ docker compose -f docker-compose.vps.yml exec paseo gosu paseo bun --version
 
 Then verify:
 
-1. Paseo Desktop can add the VPS through Remote SSH.
+1. Paseo Desktop can pair with the VPS daemon through Paseo Relay; SSH remains an optional fallback.
 2. A repository can be cloned into `/workspace`.
 3. OpenCode discovers global skills.
 4. A dev service gets a deterministic preview URL when the preview proxy is configured.

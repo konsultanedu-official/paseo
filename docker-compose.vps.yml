@@ -5,10 +5,14 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
-      # The daemon listens inside the container, while Docker publishes it only
-      # to VPS loopback for Paseo Desktop's SSH transport.
+      # Headless daemon. Relay is the primary Desktop transport; the daemon is
+      # still published to VPS loopback only for health checks and SSH fallback.
       PASEO_LISTEN: "0.0.0.0:6767"
       PASEO_WEB_UI_ENABLED: "false"
+
+      # Defense in depth for direct/loopback access. Relay pairing still uses
+      # Paseo's own end-to-end encrypted relay transport.
+      PASEO_PASSWORD: "${PASEO_PASSWORD}"
 
       # Optional workspace service proxy for dev previews. Keep it loopback-only
       # on the VPS and publish it through a separate trusted reverse proxy/tunnel.
@@ -26,8 +30,8 @@ services:
       __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS: "${__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS:-}"
 
     ports:
-      # Paseo control plane: reachable only from the VPS itself. Paseo Desktop
-      # reaches this through native SSH transport (ssh -W 127.0.0.1:6767 ...).
+      # Paseo control plane: never public. Relay needs outbound 443 only.
+      # Loopback remains available for local health/debug and SSH fallback.
       - "127.0.0.1:6767:6767"
 
       # Preview/service proxy. A host reverse proxy or tunnel may publish this.
@@ -36,6 +40,9 @@ services:
     volumes:
       - paseo_home:/home/paseo
       - paseo_workspace:/workspace
+
+    security_opt:
+      - no-new-privileges:true
 
 volumes:
   paseo_home:

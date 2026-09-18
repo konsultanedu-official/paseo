@@ -84,3 +84,13 @@ Current default agent routing:
 - Plan Deep -> `9router/high-model`
 
 The fallback combos exposed to Paseo are `high-model`, `low-model`, and `free-model`. Keep `opencode.json` synchronized with the actual combo IDs configured in 9Router; stale combo IDs can appear selectable in OpenCode but fail at request time.
+
+
+## Environment-specific OpenCode profiles
+
+The repository ships separate OpenCode profiles so the experimental homeserver and the headless VPS do not have to expose the same 9Router combinations:
+
+- `/etc/opencode/opencode.homelab.json` — homeserver profile, including the broader experimental combo set.
+- `/etc/opencode/opencode.vps.json` — VPS profile, limited to direct coding models plus `high-model`, `low-model`, and `free-model`.
+
+`docker-compose.yml` pins the homeserver to the homelab profile. `docker-compose.vps.yml` pins the VPS to the VPS profile. The generic `opencode.json` remains packaged for backward compatibility but is not selected by either compose profile.

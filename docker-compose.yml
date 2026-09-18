@@ -12,7 +12,7 @@ services:
       PASEO_SERVICE_PROXY_PUBLIC_BASE_URL: "${PASEO_SERVICE_PROXY_PUBLIC_BASE_URL}"
       NINEROUTER_BASE_URL: "${NINEROUTER_BASE_URL}"
       NINEROUTER_API_KEY: "${NINEROUTER_API_KEY}"
-      OPENCODE_CONFIG: "/etc/opencode/opencode.json"
+      OPENCODE_CONFIG: "/etc/opencode/opencode.homelab.json"
     ports:
       - "127.0.0.1:18080:8080"
     expose:

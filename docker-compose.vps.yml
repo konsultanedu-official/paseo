@@ -16,8 +16,10 @@ services:
 
       # Optional workspace service proxy for dev previews. Keep it loopback-only
       # on the VPS and publish it through a separate trusted reverse proxy/tunnel.
+      # Do not set PASEO_SERVICE_PROXY_PUBLIC_BASE_URL to an empty string:
+      # Paseo validates any present value as a URL. Add it only when preview
+      # publishing is actually configured.
       PASEO_SERVICE_PROXY_LISTEN: "${PASEO_SERVICE_PROXY_LISTEN:-0.0.0.0:8080}"
-      PASEO_SERVICE_PROXY_PUBLIC_BASE_URL: "${PASEO_SERVICE_PROXY_PUBLIC_BASE_URL:-}"
       PASEO_HOSTNAMES: "${PASEO_HOSTNAMES:-localhost,127.0.0.1}"
       PASEO_TRUSTED_PROXIES: "${PASEO_TRUSTED_PROXIES:-loopback,172.16.0.0/12}"
 

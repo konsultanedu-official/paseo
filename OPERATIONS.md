@@ -68,3 +68,19 @@ gosu paseo rg --version
 Then validate skill discovery from at least two different project directories with a fresh OpenCode process. Finally, validate one actual `skill` tool load through a newly started OpenCode server, not only by reading `SKILL.md` directly or by checking filesystem discovery.
 
 If active sessions exist, postpone shared-server restart until a maintenance window.
+
+
+## 9Router model exposure for Paseo
+
+Paseo/OpenCode intentionally exposes direct coding models plus only infrastructure-level fallback combos. Product-facing 9Router combos used by OpenWebUI (for example `ai-assistant`, `cheap`, `gpt`, `gemini`, `claude`, or `free-access`) are not duplicated into the Paseo model list.
+
+Current default agent routing:
+
+- Plan -> `9router/cx/gpt-6-astra`
+- Build -> `9router/cx/gpt-5.6-sol`
+- Review -> `9router/cx/gpt-5.6-sol-review`
+- General -> `9router/ag/gemini-3.8-flash-high`
+- Explore -> `9router/ag/gemini-3.8-flash-low`
+- Plan Deep -> `9router/high-model`
+
+The fallback combos exposed to Paseo are `high-model`, `low-model`, and `free-model`. Keep `opencode.json` synchronized with the actual combo IDs configured in 9Router; stale combo IDs can appear selectable in OpenCode but fail at request time.

@@ -21,13 +21,13 @@ services:
       PASEO_DICTATION_ENABLED: "0"
       PASEO_VOICE_MODE_ENABLED: "0"
 
-      # Optional workspace service proxy for dev previews. Keep it loopback-only
-      # on the VPS and publish it through a separate trusted reverse proxy/tunnel.
-      # Do not set PASEO_SERVICE_PROXY_PUBLIC_BASE_URL to an empty string:
-      # Paseo validates any present value as a URL. Add it only when preview
-      # publishing is actually configured.
+      # Workspace service proxy for dev previews. The standalone listener stays
+      # loopback-only on the VPS; aaPanel/Nginx + Cloudflare publish HTTPS.
+      # Paseo generates first-level preview hosts such as
+      # dev--project-hash.konsultanedu.my.id.
       PASEO_SERVICE_PROXY_LISTEN: "${PASEO_SERVICE_PROXY_LISTEN:-0.0.0.0:8080}"
-      PASEO_HOSTNAMES: "${PASEO_HOSTNAMES:-localhost,127.0.0.1}"
+      PASEO_SERVICE_PROXY_PUBLIC_BASE_URL: "${PASEO_SERVICE_PROXY_PUBLIC_BASE_URL:-https://konsultanedu.my.id}"
+      PASEO_HOSTNAMES: "${PASEO_HOSTNAMES:-localhost,127.0.0.1,.konsultanedu.my.id}"
       PASEO_TRUSTED_PROXIES: "${PASEO_TRUSTED_PROXIES:-loopback,172.16.0.0/12}"
 
       # Model gateway / OpenCode runtime.
@@ -35,15 +35,16 @@ services:
       NINEROUTER_API_KEY: "${NINEROUTER_API_KEY}"
       OPENCODE_CONFIG: "/etc/opencode/opencode.vps.json"
 
-      # Optional Vite wildcard preview allowlist, e.g. .dev.example.com
-      __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS: "${__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS:-}"
+      # Vite allowlist for the owned preview namespace. A leading dot permits
+      # the apex and all subdomains without allowing arbitrary hosts.
+      __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS: "${__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS:-.konsultanedu.my.id}"
 
     ports:
       # Paseo control plane: never public. Relay needs outbound 443 only.
       # Loopback remains available for local health/debug and SSH fallback.
       - "127.0.0.1:6767:6767"
 
-      # Preview/service proxy. A host reverse proxy or tunnel may publish this.
+      # Preview/service proxy. Only the host reverse proxy should publish this.
       - "127.0.0.1:18080:8080"
 
     volumes:

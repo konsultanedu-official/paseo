@@ -9,10 +9,10 @@
         "apiKey": "{env:NINEROUTER_API_KEY}"
       },
       "models": {
-        "paseo-fast": { "name": "Paseo Fast (Combo)" },
-        "paseo-build": { "name": "Paseo Build (Combo)" },
-        "paseo-plan": { "name": "Paseo Plan (Combo)" },
-        "paseo-review": { "name": "Paseo Review (Combo)" },
+        "paseo-fast": { "name": "Paseo Fast (Combo, manual test)" },
+        "paseo-build": { "name": "Paseo Build (Combo, manual test)" },
+        "paseo-plan": { "name": "Paseo Plan (Combo, manual test)" },
+        "paseo-review": { "name": "Paseo Review (Combo, manual test)" },
 
         "cx/gpt-6-astra": {
           "name": "GPT-6 Astra",
@@ -68,7 +68,7 @@
   },
   "agent": {
     "plan": {
-      "model": "9router/paseo-plan"
+      "model": "9router/cx/gpt-6-astra"
     },
     "build": {
       "model": "9router/ag/gemini-3.8-flash-medium"
@@ -80,9 +80,9 @@
       "model": "9router/ag/gemini-3.8-flash-low"
     },
     "plan-deep": {
-      "description": "Deep planning and architecture mode. Defaults to Paseo Plan and can be overridden per session with the model picker.",
+      "description": "Deep planning and architecture mode. Defaults to GPT-6 Astra and can be overridden per session with the model picker.",
       "mode": "primary",
-      "model": "9router/paseo-plan",
+      "model": "9router/cx/gpt-6-astra",
       "tools": { "write": false, "edit": false, "bash": false }
     },
     "build-deep": {
@@ -96,9 +96,9 @@
       "model": "9router/cx/gpt-5.6-terra"
     },
     "review": {
-      "description": "Read-only code review focused on correctness, security, performance, and maintainability.",
+      "description": "Read-only code review focused on correctness, security, performance, and maintainability. Defaults to GPT-5.6 Terra Review and can be overridden per session with the model picker.",
       "mode": "subagent",
-      "model": "9router/paseo-review",
+      "model": "9router/cx/gpt-5.6-terra-review",
       "tools": { "write": false, "edit": false, "bash": false }
     }
   }

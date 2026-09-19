@@ -9,6 +9,11 @@
         "apiKey": "{env:NINEROUTER_API_KEY}"
       },
       "models": {
+        "paseo-fast": { "name": "Paseo Fast (Combo)" },
+        "paseo-build": { "name": "Paseo Build (Combo)" },
+        "paseo-plan": { "name": "Paseo Plan (Combo)" },
+        "paseo-review": { "name": "Paseo Review (Combo)" },
+
         "cx/gpt-6-astra": {
           "name": "GPT-6 Astra",
           "limit": { "context": 272000, "output": 128000 }
@@ -21,8 +26,29 @@
           "name": "GPT-5.6 Sol Review",
           "limit": { "context": 372000, "output": 128000 }
         },
+        "cx/gpt-5.6-terra": {
+          "name": "GPT-5.6 Terra",
+          "limit": { "context": 372000, "output": 128000 }
+        },
+        "cx/gpt-5.6-terra-review": {
+          "name": "GPT-5.6 Terra Review",
+          "limit": { "context": 372000, "output": 128000 }
+        },
+        "cx/gpt-5.6-luna": {
+          "name": "GPT-5.6 Luna",
+          "limit": { "context": 372000, "output": 128000 }
+        },
+        "cx/gpt-5.6-luna-review": {
+          "name": "GPT-5.6 Luna Review",
+          "limit": { "context": 372000, "output": 128000 }
+        },
+
         "ag/gemini-3.8-flash-high": {
           "name": "Gemini 3.8 Flash High",
+          "limit": { "context": 1048576, "output": 65536 }
+        },
+        "ag/gemini-3.8-flash-medium": {
+          "name": "Gemini 3.8 Flash Medium",
           "limit": { "context": 1048576, "output": 65536 }
         },
         "ag/gemini-3.8-flash-low": {
@@ -36,28 +62,43 @@
         "ag/claude-sonnet-4-6": {
           "name": "Claude Sonnet 4.6",
           "limit": { "context": 1000000, "output": 128000 }
-        },
-        "high-model": { "name": "High Model (Combo)" },
-        "low-model": { "name": "Low Model (Combo)" },
-        "free-model": { "name": "Free Model (Combo)" }
+        }
       }
     }
   },
   "agent": {
-    "plan": { "model": "9router/cx/gpt-6-astra" },
-    "build": { "model": "9router/cx/gpt-5.6-sol" },
-    "general": { "model": "9router/ag/gemini-3.8-flash-high" },
-    "explore": { "model": "9router/ag/gemini-3.8-flash-low" },
+    "plan": {
+      "model": "9router/paseo-plan"
+    },
+    "build": {
+      "model": "9router/ag/gemini-3.8-flash-medium"
+    },
+    "general": {
+      "model": "9router/ag/gemini-3.8-flash-low"
+    },
+    "explore": {
+      "model": "9router/ag/gemini-3.8-flash-low"
+    },
     "plan-deep": {
-      "description": "Deep planning and architecture mode using the 9Router high-model fallback combo.",
+      "description": "Deep planning and architecture mode. Defaults to Paseo Plan and can be overridden per session with the model picker.",
       "mode": "primary",
-      "model": "9router/high-model",
+      "model": "9router/paseo-plan",
       "tools": { "write": false, "edit": false, "bash": false }
+    },
+    "build-deep": {
+      "description": "High-capability implementation mode. Defaults to Claude Sonnet and can be overridden per session with the model picker.",
+      "mode": "primary",
+      "model": "9router/ag/claude-sonnet-4-6"
+    },
+    "build-codex": {
+      "description": "Codex implementation escape hatch. Defaults to GPT-5.6 Terra and can be overridden per session with the model picker.",
+      "mode": "primary",
+      "model": "9router/cx/gpt-5.6-terra"
     },
     "review": {
       "description": "Read-only code review focused on correctness, security, performance, and maintainability.",
       "mode": "subagent",
-      "model": "9router/cx/gpt-5.6-sol-review",
+      "model": "9router/paseo-review",
       "tools": { "write": false, "edit": false, "bash": false }
     }
   }

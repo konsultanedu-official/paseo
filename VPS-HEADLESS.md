@@ -16,7 +16,7 @@ VPS
   /workspace    persistent repositories/worktrees
   outbound 443    official Paseo relay (primary control transport)
   127.0.0.1:6767 daemon control plane (local health/debug + SSH fallback only)
-  127.0.0.1:18080 service proxy (published only through aaPanel/Nginx + Cloudflare)
+  127.0.0.1:18080 service proxy (publish separately only when previews are needed)
 ```
 
 The Web UI is disabled in `docker-compose.vps.yml`. Browser tabs are not run in the VPS container; Paseo Desktop hosts browser tabs and the daemon routes browser-tool calls to a connected Desktop browser host.
@@ -39,43 +39,13 @@ NINEROUTER_API_KEY=...
 
 Copy `.env.example` to `.env`, replace the placeholders, and keep `.env` root-readable only. The repository ignores `.env`.
 
-The VPS preview namespace is `konsultanedu.my.id`:
+Optional preview variables:
 
 ```env
-PASEO_SERVICE_PROXY_PUBLIC_BASE_URL=https://konsultanedu.my.id
-PASEO_HOSTNAMES=localhost,127.0.0.1,.konsultanedu.my.id
-PASEO_TRUSTED_PROXIES=loopback,172.16.0.0/12
-__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS=.konsultanedu.my.id
+PASEO_SERVICE_PROXY_PUBLIC_BASE_URL=https://dev.example.com
+PASEO_HOSTNAMES=localhost,127.0.0.1,.dev.example.com
+__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS=.dev.example.com
 ```
-
-Paseo combines the script/branch/project identity into one leftmost DNS label, so a service URL stays compatible with a normal single-level wildcard certificate, for example:
-
-```text
-https://dev--konsultanedu-web-lab-dda11d6a.konsultanedu.my.id
-```
-
-For Cloudflare, create a proxied wildcard DNS record for `*.konsultanedu.my.id` pointing to the VPS. Specific DNS records continue to take precedence over the wildcard. Keep the Paseo daemon control port private; only the preview reverse proxy should be internet-facing.
-
-For aaPanel/Nginx, use a wildcard server name and preserve the original Host header so Paseo can select the correct workspace service:
-
-```nginx
-server {
-    listen 80;
-    server_name *.konsultanedu.my.id;
-
-    location / {
-        proxy_pass http://127.0.0.1:18080;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-    }
-}
-```
-
-Terminate HTTPS at Cloudflare/aaPanel with a certificate that covers `*.konsultanedu.my.id`. Prefer Cloudflare Full (strict) with a valid origin certificate rather than exposing the Paseo service proxy directly.
 
 Do not publish TCP 6767 on `0.0.0.0`. The compose profile binds it only to VPS loopback. Desktop should normally connect through Paseo's end-to-end encrypted relay; loopback 6767 remains available for local health/debug and SSH fallback. Keep `PASEO_PASSWORD` enabled as defense in depth for direct/loopback access.
 
@@ -252,7 +222,7 @@ Paseo Desktop -> E2EE Paseo Relay -> daemon
 Fallback: Paseo Desktop -> SSH -> VPS 127.0.0.1:6767
 
 Preview:
-Browser -> HTTPS *.konsultanedu.my.id -> Cloudflare -> aaPanel/Nginx
+Browser -> HTTPS wildcard -> reverse proxy / Cloudflare Tunnel
         -> VPS 127.0.0.1:18080 -> Paseo service proxy -> dynamic dev port
 ```
 
@@ -278,6 +248,6 @@ Then verify:
 1. Paseo Desktop can pair with the VPS daemon through Paseo Relay; SSH remains an optional fallback.
 2. A repository can be cloned into `/workspace`.
 3. OpenCode discovers global skills.
-4. A dev service gets a deterministic `https://*.konsultanedu.my.id` preview URL and proxies through `127.0.0.1:18080`.
+4. A dev service gets a deterministic preview URL when the preview proxy is configured.
 5. Browser tools work only while a Desktop browser host is connected.
 6. Recreating the container with the same volumes preserves skills, credentials, projects, and config.

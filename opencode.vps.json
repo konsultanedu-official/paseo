@@ -79,24 +79,8 @@
     "explore": {
       "model": "9router/ag/gemini-3.8-flash-low"
     },
-    "plan-deep": {
-      "description": "Deep planning and architecture mode. Defaults to GPT-6 Astra and can be overridden per session with the model picker.",
-      "mode": "primary",
-      "model": "9router/cx/gpt-6-astra",
-      "tools": { "write": false, "edit": false, "bash": false }
-    },
-    "build-deep": {
-      "description": "High-capability implementation mode. Defaults to Claude Sonnet and can be overridden per session with the model picker.",
-      "mode": "primary",
-      "model": "9router/ag/claude-sonnet-4-6"
-    },
-    "build-codex": {
-      "description": "Codex implementation escape hatch. Defaults to GPT-5.6 Terra and can be overridden per session with the model picker.",
-      "mode": "primary",
-      "model": "9router/cx/gpt-5.6-terra"
-    },
     "review": {
-      "description": "Read-only code review focused on correctness, security, performance, and maintainability. Defaults to GPT-5.6 Terra Review and can be overridden per session with the model picker.",
+      "description": "Read-only code review focused on correctness, security, performance, and maintainability.",
       "mode": "subagent",
       "model": "9router/cx/gpt-5.6-terra-review",
       "tools": { "write": false, "edit": false, "bash": false }

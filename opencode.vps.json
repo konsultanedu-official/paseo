@@ -9,10 +9,10 @@
         "apiKey": "{env:NINEROUTER_API_KEY}"
       },
       "models": {
-        "paseo-fast": { "name": "Paseo Fast (Combo, manual test)" },
-        "paseo-build": { "name": "Paseo Build (Combo, manual test)" },
-        "paseo-plan": { "name": "Paseo Plan (Combo, manual test)" },
-        "paseo-review": { "name": "Paseo Review (Combo, manual test)" },
+        "paseo-fast": { "name": "Paseo Fast" },
+        "paseo-build": { "name": "Paseo Build" },
+        "paseo-plan": { "name": "Paseo Plan" },
+        "paseo-review": { "name": "Paseo Review" },
 
         "cx/gpt-6-astra": {
           "name": "GPT-6 Astra",
@@ -68,21 +68,21 @@
   },
   "agent": {
     "plan": {
-      "model": "9router/cx/gpt-6-astra"
+      "model": "9router/paseo-plan"
     },
     "build": {
-      "model": "9router/ag/gemini-3.8-flash-medium"
+      "model": "9router/paseo-build"
     },
     "general": {
-      "model": "9router/ag/gemini-3.8-flash-low"
+      "model": "9router/paseo-fast"
     },
     "explore": {
-      "model": "9router/ag/gemini-3.8-flash-low"
+      "model": "9router/paseo-fast"
     },
     "review": {
       "description": "Read-only code review focused on correctness, security, performance, and maintainability.",
       "mode": "subagent",
-      "model": "9router/cx/gpt-5.6-terra-review",
+      "model": "9router/paseo-review",
       "tools": { "write": false, "edit": false, "bash": false }
     }
   }

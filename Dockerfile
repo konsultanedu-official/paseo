@@ -16,14 +16,15 @@ RUN set -eux; \
       arm64) GITLEAKS_ARCH=arm64 ;; \
       *) echo "Unsupported architecture for gitleaks: $TARGETARCH" >&2; exit 1 ;; \
     esac; \
-    curl -fsSL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_${GITLEAKS_ARCH}.tar.gz" -o /tmp/gitleaks.tar.gz; \
+    GITLEAKS_TARBALL="gitleaks_${GITLEAKS_VERSION}_linux_${GITLEAKS_ARCH}.tar.gz"; \
+    curl -fsSL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${GITLEAKS_TARBALL}" -o "/tmp/${GITLEAKS_TARBALL}"; \
     curl -fsSL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_checksums.txt" -o /tmp/gitleaks-checksums.txt; \
     cd /tmp; \
-    grep "gitleaks_${GITLEAKS_VERSION}_linux_${GITLEAKS_ARCH}.tar.gz" gitleaks-checksums.txt | sha256sum -c -; \
-    tar -xzf gitleaks.tar.gz -C /usr/local/bin gitleaks; \
+    grep "  ${GITLEAKS_TARBALL}$" gitleaks-checksums.txt | sha256sum -c -; \
+    tar -xzf "${GITLEAKS_TARBALL}" -C /usr/local/bin gitleaks; \
     chmod 0755 /usr/local/bin/gitleaks; \
     gitleaks version; \
-    rm -f /tmp/gitleaks.tar.gz /tmp/gitleaks-checksums.txt; \
+    rm -f "/tmp/${GITLEAKS_TARBALL}" /tmp/gitleaks-checksums.txt; \
     NPM_CONFIG_CACHE=/tmp/npm-cache npm install -g opencode-ai bun@1.4.2; \
     rm -rf /tmp/npm-cache
 

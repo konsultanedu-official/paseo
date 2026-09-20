@@ -41,4 +41,14 @@ repair_runtime_tree "${XDG_STATE_HOME}/opencode"
 repair_runtime_tree "${HOME}/.agents/skills"
 repair_runtime_tree "${NPM_CONFIG_CACHE}"
 
+# Sync image-managed global skills into the persistent Paseo home on every start.
+# This keeps generic skills available across all repositories/worktrees while
+# allowing the named volume at /home/paseo to remain persistent.
+if [[ -d /usr/local/share/paseo-skills ]]; then
+  cp -a /usr/local/share/paseo-skills/. "${HOME}/.agents/skills/"
+  if [[ "$(id -u)" == "0" ]]; then
+    chown -R paseo:paseo "${HOME}/.agents/skills"
+  fi
+fi
+
 exec /usr/local/bin/paseo-docker-entrypoint "$@"

@@ -306,6 +306,28 @@
         "task": "deny",
         "external_directory": "deny"
       }
+    },
+    "security": {
+      "description": "Read-only security review with restricted deterministic scanning commands. Must not modify source files.",
+      "mode": "primary",
+      "permission": {
+        "edit": "deny",
+        "task": "deny",
+        "external_directory": "deny",
+        "bash": {
+          "git status": "allow",
+          "git status *": "allow",
+          "git diff": "allow",
+          "git diff *": "allow",
+          "git log": "allow",
+          "git log *": "allow",
+          "gitleaks version": "allow",
+          "gitleaks git *": "allow",
+          "bun audit": "allow",
+          "bun audit *": "allow",
+          "*": "deny"
+        }
+      }
     }
   },
   "mcp": {

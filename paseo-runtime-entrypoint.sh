@@ -51,8 +51,8 @@ if [[ -d /usr/local/share/paseo-skills ]]; then
   fi
 fi
 
-# Keep the QA provider policy reproducible without overwriting user-managed
-# profiles or unrelated Paseo settings. This only merges one custom provider.
+# Keep managed restricted-provider policies reproducible without overwriting
+# user-managed profiles or unrelated Paseo settings.
 PASEO_CONFIG_FILE="${HOME}/.paseo/config.json"
 if [[ -f "${PASEO_CONFIG_FILE}" ]]; then
   PASEO_CONFIG_FILE="${PASEO_CONFIG_FILE}" node <<'NODE'
@@ -97,6 +97,16 @@ config.agents.providers["opencode-qa"] = {
       "browser_evaluate",
       "browser_upload"
     ]
+  }
+};
+
+
+config.agents.providers["opencode-security"] = {
+  extends: "opencode",
+  label: "OpenCode Security",
+  description: "OpenCode for read-only security review with no Paseo control-plane tools.",
+  paseoTools: {
+    enabled: false
   }
 };
 

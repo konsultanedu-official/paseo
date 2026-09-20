@@ -12,6 +12,7 @@ RUN set -eux; \
     rm -rf /tmp/npm-cache
 
 COPY --chown=paseo:paseo opencode*.json /etc/opencode/
+COPY --chown=paseo:paseo skills/ /usr/local/share/paseo-skills/
 COPY paseo-runtime-entrypoint.sh /usr/local/bin/paseo-runtime-entrypoint
 
 RUN chmod 0755 /usr/local/bin/paseo-runtime-entrypoint

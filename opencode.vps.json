@@ -290,6 +290,20 @@
         "edit": false,
         "bash": false
       }
+    },
+    "qa": {
+      "description": "Runtime and browser QA. May operate preview services and browser tools, but must not modify source files.",
+      "mode": "primary",
+      "permission": {
+        "edit": "deny",
+        "bash": {
+          "git status": "allow",
+          "git status *": "allow",
+          "git diff": "allow",
+          "git diff *": "allow",
+          "*": "deny"
+        }
+      }
     }
   },
   "mcp": {

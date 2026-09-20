@@ -303,5 +303,10 @@
     "websearch": "allow",
     "webfetch": "allow",
     "skill": "allow"
+  },
+  "skills": {
+    "paths": [
+      "/home/paseo/.agents/skills"
+    ]
   }
 }

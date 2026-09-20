@@ -35,12 +35,14 @@ Use multiple evidence types and keep them distinct:
 4. **Git state**
    - Use `git status --porcelain` before and after the review.
    - Use `git diff` or `git diff --stat` to understand the review scope.
+   - Use `git ls-files` only when a tracked-file inventory is needed.
    - The working tree must remain unchanged by the security review.
 
 ## Rules
 
 - Never create, edit, delete, commit, push, merge, or deploy.
 - Never use generic Paseo terminal/control-plane tools during security review.
+- Run shell checks as separate tool calls. Do not chain allowed commands with `&&`, `;`, pipes, command substitution, or shell redirection, because the Security mode intentionally matches a narrow command allowlist.
 - Never use a workaround if a blocked command would be required.
 - Do not read or expose .env files, credentials, private keys, tokens, or secret stores.
 - Do not weaken scanner configuration just to obtain a clean result.

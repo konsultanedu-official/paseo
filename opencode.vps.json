@@ -11,81 +11,259 @@
       "models": {
         "paseo-fast": {
           "name": "Paseo Fast",
-          "modalities": { "input": ["text", "image"], "output": ["text"] }
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "reasoning": true
         },
         "paseo-build": {
           "name": "Paseo Build",
-          "modalities": { "input": ["text", "image"], "output": ["text"] }
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "reasoning": true
         },
         "paseo-plan": {
           "name": "Paseo Plan",
-          "modalities": { "input": ["text", "image"], "output": ["text"] }
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "reasoning": true
         },
         "paseo-review": {
           "name": "Paseo Review",
-          "modalities": { "input": ["text", "image"], "output": ["text"] }
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "reasoning": true
         },
-
         "cx/gpt-6-astra": {
           "name": "GPT-6 Astra",
-          "modalities": { "input": ["text", "image"], "output": ["text"] },
-          "limit": { "context": 272000, "output": 128000 }
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "limit": {
+            "context": 272000,
+            "output": 128000
+          },
+          "reasoning": true
         },
         "cx/gpt-5.6-sol": {
           "name": "GPT-5.6 Sol",
-          "modalities": { "input": ["text", "image"], "output": ["text"] },
-          "limit": { "context": 372000, "output": 128000 }
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "limit": {
+            "context": 372000,
+            "output": 128000
+          },
+          "reasoning": true
         },
         "cx/gpt-5.6-sol-review": {
           "name": "GPT-5.6 Sol Review",
-          "modalities": { "input": ["text", "image"], "output": ["text"] },
-          "limit": { "context": 372000, "output": 128000 }
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "limit": {
+            "context": 372000,
+            "output": 128000
+          },
+          "reasoning": true
         },
         "cx/gpt-5.6-terra": {
           "name": "GPT-5.6 Terra",
-          "modalities": { "input": ["text", "image"], "output": ["text"] },
-          "limit": { "context": 372000, "output": 128000 }
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "limit": {
+            "context": 372000,
+            "output": 128000
+          },
+          "reasoning": true
         },
         "cx/gpt-5.6-terra-review": {
           "name": "GPT-5.6 Terra Review",
-          "modalities": { "input": ["text", "image"], "output": ["text"] },
-          "limit": { "context": 372000, "output": 128000 }
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "limit": {
+            "context": 372000,
+            "output": 128000
+          },
+          "reasoning": true
         },
         "cx/gpt-5.6-luna": {
           "name": "GPT-5.6 Luna",
-          "modalities": { "input": ["text", "image"], "output": ["text"] },
-          "limit": { "context": 372000, "output": 128000 }
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "limit": {
+            "context": 372000,
+            "output": 128000
+          },
+          "reasoning": true
         },
         "cx/gpt-5.6-luna-review": {
           "name": "GPT-5.6 Luna Review",
-          "modalities": { "input": ["text", "image"], "output": ["text"] },
-          "limit": { "context": 372000, "output": 128000 }
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "limit": {
+            "context": 372000,
+            "output": 128000
+          },
+          "reasoning": true
         },
-
         "ag/gemini-3.8-flash-high": {
           "name": "Gemini 3.8 Flash High",
-          "modalities": { "input": ["text", "image"], "output": ["text"] },
-          "limit": { "context": 1048576, "output": 65536 }
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "limit": {
+            "context": 1048576,
+            "output": 65536
+          },
+          "reasoning": true
         },
         "ag/gemini-3.8-flash-medium": {
           "name": "Gemini 3.8 Flash Medium",
-          "modalities": { "input": ["text", "image"], "output": ["text"] },
-          "limit": { "context": 1048576, "output": 65536 }
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "limit": {
+            "context": 1048576,
+            "output": 65536
+          },
+          "reasoning": true
         },
         "ag/gemini-3.8-flash-low": {
           "name": "Gemini 3.8 Flash Low",
-          "modalities": { "input": ["text", "image"], "output": ["text"] },
-          "limit": { "context": 1048576, "output": 65536 }
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "limit": {
+            "context": 1048576,
+            "output": 65536
+          },
+          "reasoning": true
         },
         "ag/claude-opus-4-6-thinking": {
           "name": "Claude Opus 4.6 Thinking",
-          "modalities": { "input": ["text", "image"], "output": ["text"] },
-          "limit": { "context": 200000, "output": 64000 }
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "limit": {
+            "context": 200000,
+            "output": 64000
+          },
+          "reasoning": true
         },
         "ag/claude-sonnet-4-6": {
           "name": "Claude Sonnet 4.6",
-          "modalities": { "input": ["text", "image"], "output": ["text"] },
-          "limit": { "context": 1000000, "output": 128000 }
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "limit": {
+            "context": 1000000,
+            "output": 128000
+          },
+          "reasoning": true
         }
       }
     }
@@ -107,7 +285,11 @@
       "description": "Read-only code review focused on correctness, security, performance, and maintainability.",
       "mode": "subagent",
       "model": "9router/paseo-review",
-      "tools": { "write": false, "edit": false, "bash": false }
+      "tools": {
+        "write": false,
+        "edit": false,
+        "bash": false
+      }
     }
   }
 }

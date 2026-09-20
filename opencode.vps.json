@@ -297,11 +297,11 @@
       "permission": {
         "edit": "deny",
         "bash": {
+          "*": "deny",
           "git status": "allow",
           "git status *": "allow",
           "git diff": "allow",
-          "git diff *": "allow",
-          "*": "deny"
+          "git diff *": "allow"
         },
         "task": "deny",
         "external_directory": "deny"
@@ -315,6 +315,7 @@
         "task": "deny",
         "external_directory": "deny",
         "bash": {
+          "*": "deny",
           "git status": "allow",
           "git status *": "allow",
           "git diff": "allow",
@@ -324,8 +325,7 @@
           "gitleaks version": "allow",
           "gitleaks git *": "allow",
           "bun audit": "allow",
-          "bun audit *": "allow",
-          "*": "deny"
+          "bun audit *": "allow"
         }
       }
     }

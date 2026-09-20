@@ -51,4 +51,60 @@ if [[ -d /usr/local/share/paseo-skills ]]; then
   fi
 fi
 
+# Keep the QA provider policy reproducible without overwriting user-managed
+# profiles or unrelated Paseo settings. This only merges one custom provider.
+PASEO_CONFIG_FILE="${HOME}/.paseo/config.json"
+if [[ -f "${PASEO_CONFIG_FILE}" ]]; then
+  PASEO_CONFIG_FILE="${PASEO_CONFIG_FILE}" node <<'NODE'
+const fs = require("fs");
+const path = process.env.PASEO_CONFIG_FILE;
+const raw = fs.readFileSync(path, "utf8");
+const config = JSON.parse(raw);
+
+config.agents ??= {};
+config.agents.providers ??= {};
+config.agents.providers["opencode-qa"] = {
+  extends: "opencode",
+  label: "OpenCode QA",
+  description: "OpenCode with a restricted Paseo tool catalog for runtime and browser QA.",
+  paseoTools: {
+    enabled: true,
+    disabledTools: [
+      "create_agent",
+      "send_agent_prompt",
+      "cancel_agent",
+      "archive_agent",
+      "kill_agent",
+      "update_agent",
+      "set_agent_mode",
+      "create_workspace",
+      "rename_workspace",
+      "archive_workspace",
+      "create_terminal",
+      "kill_terminal",
+      "capture_terminal",
+      "list_terminals",
+      "send_terminal_keys",
+      "create_schedule",
+      "pause_schedule",
+      "resume_schedule",
+      "update_schedule",
+      "run_schedule_once",
+      "delete_schedule",
+      "create_heartbeat",
+      "delete_heartbeat",
+      "respond_to_permission",
+      "browser_evaluate",
+      "browser_upload"
+    ]
+  }
+};
+
+fs.writeFileSync(path, JSON.stringify(config, null, 2) + "\n");
+NODE
+  if [[ "$(id -u)" == "0" ]]; then
+    chown paseo:paseo "${PASEO_CONFIG_FILE}"
+  fi
+fi
+
 exec /usr/local/bin/paseo-docker-entrypoint "$@"

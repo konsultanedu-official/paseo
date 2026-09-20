@@ -322,6 +322,8 @@
           "git diff *": "allow",
           "git log": "allow",
           "git log *": "allow",
+          "git ls-files": "allow",
+          "git ls-files *": "allow",
           "gitleaks version": "allow",
           "gitleaks git *": "allow",
           "bun audit": "allow",

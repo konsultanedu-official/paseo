@@ -302,7 +302,9 @@
           "git diff": "allow",
           "git diff *": "allow",
           "*": "deny"
-        }
+        },
+        "task": "deny",
+        "external_directory": "deny"
       }
     }
   },

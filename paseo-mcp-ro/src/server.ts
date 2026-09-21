@@ -97,7 +97,7 @@ server.registerTool(
     return json({
       connected: true,
       daemon: daemonUrl.replace(/\/\/.*@/, "//[redacted]@"),
-      projects: projects.entries?.length ?? 0,
+      projects: projects.projects?.length ?? 0,
       workspaces: workspaces.entries.length,
       agents: agents.entries.length,
       scope: "read-only",
@@ -114,11 +114,13 @@ server.registerTool(
   async () => {
     const result = await paseo.projects.list();
     return json(
-      (result.entries ?? []).map((project: any) => ({
-        id: project.id,
-        name: project.name,
-        path: project.path ?? project.directory ?? null,
-        repository: project.repository ?? null,
+      (result.projects ?? []).map((project: any) => ({
+        id: project.projectId,
+        key: project.projectKey ?? null,
+        name: project.projectCustomName ?? project.projectDisplayName,
+        displayName: project.projectDisplayName,
+        rootPath: project.projectRootPath,
+        kind: project.projectKind,
       })),
     );
   },

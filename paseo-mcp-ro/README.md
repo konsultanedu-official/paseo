@@ -40,3 +40,24 @@ The Compose deployment binds the service to VPS loopback only. Do not publish it
 As of September 2026, ChatGPT Plus cannot attach custom MCP apps directly. Keep this service private and use it for local validation/future supported clients. ChatGPT Plus can continue using GitHub issues/PRs as the audit bridge.
 
 If a supported ChatGPT plan/workspace is used later, connect this private MCP through OpenAI Secure MCP Tunnel rather than exposing the MCP port publicly.
+
+## Local smoke test
+
+After the Compose stack is running:
+
+```bash
+sudo docker compose \
+  --env-file /opt/paseo/.env \
+  -f /opt/paseo/docker-compose.vps.yml \
+  -f /opt/paseo/docker-compose.private.yml \
+  exec -T paseo-mcp-ro \
+  bun run src/smoke.ts
+```
+
+The smoke test fails if an expected read-only tool is missing or if a write/control-like tool is exposed.
+
+You can also verify the private health endpoint from the VPS host:
+
+```bash
+curl -fsS http://127.0.0.1:17677/healthz
+```

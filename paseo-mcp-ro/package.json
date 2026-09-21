@@ -1,0 +1,14 @@
+{
+  "name": "paseo-mcp-readonly",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/server.ts"
+  },
+  "dependencies": {
+    "@getpaseo/client": "0.9.0-beta.2",
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "zod": "4.4.3"
+  }
+}

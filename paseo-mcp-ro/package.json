@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "bun run src/server.ts"
+    "start": "bun run src/server.ts",
+    "smoke": "bun run src/smoke.ts"
   },
   "dependencies": {
     "@getpaseo/client": "0.9.0-beta.2",

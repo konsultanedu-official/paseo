@@ -3,7 +3,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { z } from "zod";
 
-const daemonUrl = process.env.PASEO_DAEMON_URL ?? "ws://paseo:6767/ws";
+const daemonUrl = process.env.PASEO_DAEMON_URL ?? "ws://127.0.0.1:6767/ws";
 const daemonPassword = process.env.PASEO_PASSWORD;
 const host = process.env.PASEO_MCP_HOST ?? "0.0.0.0";
 const port = Number(process.env.PASEO_MCP_PORT ?? "3000");
@@ -16,10 +16,13 @@ if (!Number.isInteger(port) || port <= 0 || port > 65535) throw new Error("Inval
 const paseo = createPaseoClient({
   url: daemonUrl,
   password: daemonPassword,
+  connectTimeoutMs: 10_000,
   reconnect: { enabled: true, baseDelayMs: 500, maxDelayMs: 5000 },
 });
 
+console.error(`paseo-readonly MCP connecting to ${daemonUrl}`);
 await paseo.connect();
+console.error("paseo-readonly MCP connected to Paseo daemon");
 
 const server = new McpServer({
   name: "paseo-readonly",

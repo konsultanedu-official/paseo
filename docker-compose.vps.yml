@@ -55,6 +55,36 @@ services:
     security_opt:
       - no-new-privileges:true
 
+
+  paseo-mcp-ro:
+    build:
+      context: ./paseo-mcp-ro
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - paseo
+    environment:
+      PASEO_DAEMON_URL: "ws://paseo:6767/ws"
+      PASEO_PASSWORD: "${PASEO_PASSWORD}"
+      PASEO_MCP_HOST: "0.0.0.0"
+      PASEO_MCP_PORT: "3000"
+      PASEO_WORKSPACE_ROOT: "/workspace"
+      PASEO_MCP_MAX_TEXT: "60000"
+    ports:
+      # Read-only MCP facade for local validation / future Secure MCP Tunnel.
+      # Keep loopback-only; never publish this port directly.
+      - "127.0.0.1:17677:3000"
+    volumes:
+      - paseo_workspace:/workspace:ro
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+
 volumes:
   paseo_home:
   paseo_workspace:

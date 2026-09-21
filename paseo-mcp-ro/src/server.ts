@@ -66,7 +66,7 @@ async function git(cwd: string, args: string[]) {
   const proc = Bun.spawn(["git", "-C", cwd, ...args], {
     stdout: "pipe",
     stderr: "pipe",
-    env: { ...process.env, GIT_PAGER: "cat", PAGER: "cat" },
+    env: { ...process.env, GIT_PAGER: "cat", PAGER: "cat", GIT_OPTIONAL_LOCKS: "0" },
   });
 
   const timeout = setTimeout(() => proc.kill(), 10_000);

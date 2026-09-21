@@ -48,6 +48,10 @@ services:
       # Preview/service proxy. A host reverse proxy or tunnel may publish this.
       - "127.0.0.1:18080:8080"
 
+      # Read-only MCP sidecar shares this service's network namespace and listens
+      # on port 3000 there. Keep it loopback-only on the VPS.
+      - "127.0.0.1:17677:3000"
+
     volumes:
       - paseo_home:/home/paseo
       - paseo_workspace:/workspace
@@ -62,18 +66,19 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
-      - paseo
+      paseo:
+        condition: service_healthy
+    # Share Paseo's network namespace so the SDK can connect through localhost.
+    # This preserves Paseo's Host-header/DNS-rebinding protection without adding
+    # an internal Docker hostname to the daemon allowlist.
+    network_mode: "service:paseo"
     environment:
-      PASEO_DAEMON_URL: "ws://paseo:6767/ws"
+      PASEO_DAEMON_URL: "ws://127.0.0.1:6767/ws"
       PASEO_PASSWORD: "${PASEO_PASSWORD}"
       PASEO_MCP_HOST: "0.0.0.0"
       PASEO_MCP_PORT: "3000"
       PASEO_WORKSPACE_ROOT: "/workspace"
       PASEO_MCP_MAX_TEXT: "60000"
-    ports:
-      # Read-only MCP facade for local validation / future Secure MCP Tunnel.
-      # Keep loopback-only; never publish this port directly.
-      - "127.0.0.1:17677:3000"
     volumes:
       - paseo_workspace:/workspace:ro
     read_only: true

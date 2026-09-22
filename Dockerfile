@@ -28,6 +28,10 @@ RUN set -eux; \
     NPM_CONFIG_CACHE=/tmp/npm-cache npm install -g opencode-ai bun@1.4.2; \
     rm -rf /tmp/npm-cache
 
+COPY docker/patch-paseo-opencode-create-agent.mjs /tmp/patch-paseo-opencode-create-agent.mjs
+RUN node /tmp/patch-paseo-opencode-create-agent.mjs \
+    && rm -f /tmp/patch-paseo-opencode-create-agent.mjs
+
 COPY --chown=paseo:paseo opencode*.json /etc/opencode/
 COPY --chown=paseo:paseo skills/ /usr/local/share/paseo-skills/
 COPY paseo-runtime-entrypoint.sh /usr/local/bin/paseo-runtime-entrypoint

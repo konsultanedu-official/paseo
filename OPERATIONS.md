@@ -94,3 +94,67 @@ The repository ships separate OpenCode profiles so the experimental homeserver a
 - `/etc/opencode/opencode.vps.json` — VPS profile, limited to direct coding models plus `high-model`, `low-model`, and `free-model`.
 
 `docker-compose.yml` pins the homeserver to the homelab profile. `docker-compose.vps.yml` pins the VPS to the VPS profile. The generic `opencode.json` remains packaged for backward compatibility but is not selected by either compose profile.
+
+
+## Single-agent delivery orchestration
+
+The VPS profile includes a managed **Orchestrator** entry point for multi-stage delivery. The human starts one Orchestrator agent; it keeps its own provider/session while spawning fresh child agents for provider-bound phases in the appropriate workspace.
+
+Managed runtime pieces:
+
+- Paseo provider alias: `opencode-orchestrator`.
+- OpenCode mode: `orchestrator`.
+- Agent profile: `Orchestrator` (managed id `konsultanedu-delivery-orchestrator`).
+- Global skill: `delivery-orchestrator`.
+
+The pipeline is:
+
+```text
+Orchestrator
+  -> Plan agent
+  -> feature worktree
+  -> Build agent
+  -> QA agent
+  -> checkpoint Build agent
+  -> Security agent
+  -> Review agent
+  -> Delivery Build agent
+  -> Draft PR
+```
+
+Role changes are intentionally fresh Paseo agents rather than provider hot-swaps. This preserves the QA and Security provider boundaries while removing the need for the human to click **New Agent** between normal phases.
+
+The Orchestrator itself is not an implementation agent. Its OpenCode mode denies source edits, native task delegation, external-directory access, and general shell execution. Its Paseo provider policy disables terminals, browser actions, schedules, permission responses, destructive agent/workspace management, and workspace-script control. It retains only the workspace/agent delegation and discovery surface needed to coordinate workers. Paseo currently expresses this policy as a denylist, so revalidate the Orchestrator tool surface after significant Paseo upgrades.
+
+If a worker needs a permission that cannot be avoided, the Orchestrator may report the pending request but must not approve it itself.
+
+The managed profile is upserted by `paseo-runtime-entrypoint.sh` without replacing unrelated user-created agent profiles. Its model follows the active OpenCode runtime profile:
+
+- VPS: `9router/paseo-plan`
+- homelab/generic: `9router/cx/gpt-6-astra`
+
+After rebuilding/recreating Paseo, verify only the non-secret profile/provider metadata:
+
+```bash
+docker compose -f docker-compose.vps.yml exec -T paseo \
+  gosu paseo node -e '
+    const fs = require("fs");
+    const c = JSON.parse(fs.readFileSync("/home/paseo/.paseo/config.json", "utf8"));
+    const p = c.agents?.providers?.["opencode-orchestrator"];
+    const a = (c.daemon?.agentProfiles ?? []).find((x) => x.id === "konsultanedu-delivery-orchestrator");
+    console.log({ provider: p?.label, profile: a?.name, model: a?.model, modeId: a?.modeId });
+  '
+```
+
+Expected shape:
+
+```text
+{
+  provider: 'OpenCode Orchestrator',
+  profile: 'Orchestrator',
+  model: '9router/paseo-plan',
+  modeId: 'orchestrator'
+}
+```
+
+Then start a new **Orchestrator** agent and ask it to run a delivery pipeline for an issue. The normal path should not require manually creating Plan, Build, QA, Security, Review, or Delivery tabs; those appear automatically as Paseo subagents/workspace tabs.

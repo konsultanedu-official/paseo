@@ -94,19 +94,9 @@
       }
     },
     "review": {
-      "description": "Read-only code review focused on correctness, security, performance, and maintainability.",
-      "mode": "subagent",
-      "model": "9router/cx/gpt-5.6-sol-review",
-      "tools": {
-        "write": false,
-        "edit": false,
-        "bash": false
-      }
-    },
-    "orchestrator": {
-      "description": "Coordinates multi-stage delivery by delegating each phase to fresh Paseo agents. Must not modify source directly.",
+      "description": "Independent delivery audit: functional/browser QA, security scanning, diff/code review, checkpoint commit, push, and Draft PR only after all gates pass. Must never edit source files.",
       "mode": "primary",
-      "model": "9router/cx/gpt-6-astra",
+      "model": "9router/cx/gpt-5.6-sol-review",
       "tools": {
         "write": false,
         "edit": false
@@ -122,7 +112,28 @@
           "git diff": "allow",
           "git diff *": "allow",
           "git log": "allow",
-          "git log *": "allow"
+          "git log *": "allow",
+          "git show": "allow",
+          "git show *": "allow",
+          "git rev-parse": "allow",
+          "git rev-parse *": "allow",
+          "git branch": "allow",
+          "git branch *": "allow",
+          "git ls-files": "allow",
+          "git ls-files *": "allow",
+          "git add *": "allow",
+          "git commit *": "allow",
+          "git push origin *": "allow",
+          "gh issue view *": "allow",
+          "gh pr create *": "allow",
+          "gh pr view *": "allow",
+          "gitleaks version": "allow",
+          "gitleaks git *": "allow",
+          "gitleaks dir *": "allow",
+          "bun audit": "allow",
+          "bun audit *": "allow",
+          "bun run lint": "allow",
+          "bun run build": "allow"
         }
       }
     }

@@ -110,6 +110,97 @@ config.agents.providers["opencode-security"] = {
   }
 };
 
+config.agents.providers["opencode-orchestrator"] = {
+  extends: "opencode",
+  label: "OpenCode Orchestrator",
+  description:
+    "OpenCode coordinator that delegates delivery phases to fresh Paseo agents without editing source directly.",
+  paseoTools: {
+    enabled: true,
+    // Paseo currently exposes a denylist policy rather than a positive allowlist.
+    // Keep the orchestrator limited to workspace/agent delegation and read-only
+    // discovery; workers retain their own provider-specific boundaries.
+    disabledTools: [
+      "speak",
+      "archive_workspace",
+      "archive_agent",
+      "kill_agent",
+      "update_agent",
+      "rename_workspace",
+      "list_workspace_scripts",
+      "start_workspace_script",
+      "stop_workspace_script",
+      "list_terminals",
+      "create_terminal",
+      "kill_terminal",
+      "capture_terminal",
+      "send_terminal_keys",
+      "create_schedule",
+      "create_heartbeat",
+      "delete_heartbeat",
+      "list_schedules",
+      "inspect_schedule",
+      "pause_schedule",
+      "resume_schedule",
+      "delete_schedule",
+      "update_schedule",
+      "schedule_logs",
+      "run_schedule_once",
+      "set_agent_mode",
+      "respond_to_permission",
+      "browser_list_tabs",
+      "browser_new_tab",
+      "browser_snapshot",
+      "browser_click",
+      "browser_fill",
+      "browser_wait",
+      "browser_type",
+      "browser_keypress",
+      "browser_navigate",
+      "browser_back",
+      "browser_forward",
+      "browser_reload",
+      "browser_screenshot",
+      "browser_upload",
+      "browser_hover",
+      "browser_select",
+      "browser_drag",
+      "browser_logs",
+      "browser_evaluate",
+      "browser_scroll",
+      "browser_resize",
+      "browser_close_tab"
+    ]
+  }
+};
+
+
+config.daemon ??= {};
+const currentProfiles = Array.isArray(config.daemon.agentProfiles)
+  ? config.daemon.agentProfiles
+  : [];
+const orchestratorModel = (process.env.OPENCODE_CONFIG ?? "").endsWith("opencode.vps.json")
+  ? "9router/paseo-plan"
+  : "9router/cx/gpt-6-astra";
+const orchestratorProfile = {
+  id: "konsultanedu-delivery-orchestrator",
+  name: "Orchestrator",
+  provider: "opencode-orchestrator",
+  model: orchestratorModel,
+  modeId: "orchestrator",
+  notes:
+    "Single entry point for multi-stage delivery. Delegate Plan, Build, QA, Security, Review, checkpoint, and Delivery to fresh Paseo agents/workspaces; never edit source, merge main, or bypass a failed gate."
+};
+const existingOrchestratorIndex = currentProfiles.findIndex(
+  (profile) => profile?.id === orchestratorProfile.id
+);
+if (existingOrchestratorIndex >= 0) {
+  currentProfiles[existingOrchestratorIndex] = orchestratorProfile;
+} else {
+  currentProfiles.push(orchestratorProfile);
+}
+config.daemon.agentProfiles = currentProfiles;
+
 fs.writeFileSync(path, JSON.stringify(config, null, 2) + "\n");
 NODE
   if [[ "$(id -u)" == "0" ]]; then

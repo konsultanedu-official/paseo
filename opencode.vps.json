@@ -282,59 +282,9 @@
       "model": "9router/paseo-fast"
     },
     "review": {
-      "description": "Read-only code review focused on correctness, security, performance, and maintainability.",
-      "mode": "subagent",
+      "description": "Independent delivery audit: functional/browser QA, security scanning, diff/code review, checkpoint commit, push, and Draft PR only after all gates pass. Must never edit source files.",
+      "mode": "primary",
       "model": "9router/paseo-review",
-      "tools": {
-        "write": false,
-        "edit": false,
-        "bash": false
-      }
-    },
-    "qa": {
-      "description": "Runtime and browser QA. May operate preview services and browser tools, but must not modify source files.",
-      "mode": "primary",
-      "permission": {
-        "edit": "deny",
-        "bash": {
-          "*": "deny",
-          "git status": "allow",
-          "git status *": "allow",
-          "git diff": "allow",
-          "git diff *": "allow"
-        },
-        "task": "deny",
-        "external_directory": "deny"
-      }
-    },
-    "security": {
-      "description": "Read-only security review with restricted deterministic scanning commands. Must not modify source files.",
-      "mode": "primary",
-      "permission": {
-        "edit": "deny",
-        "task": "deny",
-        "external_directory": "deny",
-        "bash": {
-          "*": "deny",
-          "git status": "allow",
-          "git status *": "allow",
-          "git diff": "allow",
-          "git diff *": "allow",
-          "git log": "allow",
-          "git log *": "allow",
-          "git ls-files": "allow",
-          "git ls-files *": "allow",
-          "gitleaks version": "allow",
-          "gitleaks git *": "allow",
-          "bun audit": "allow",
-          "bun audit *": "allow"
-        }
-      }
-    },
-    "orchestrator": {
-      "description": "Coordinates multi-stage delivery by delegating each phase to fresh Paseo agents. Must not modify source directly.",
-      "mode": "primary",
-      "model": "9router/paseo-plan",
       "tools": {
         "write": false,
         "edit": false
@@ -350,7 +300,28 @@
           "git diff": "allow",
           "git diff *": "allow",
           "git log": "allow",
-          "git log *": "allow"
+          "git log *": "allow",
+          "git show": "allow",
+          "git show *": "allow",
+          "git rev-parse": "allow",
+          "git rev-parse *": "allow",
+          "git branch": "allow",
+          "git branch *": "allow",
+          "git ls-files": "allow",
+          "git ls-files *": "allow",
+          "git add *": "allow",
+          "git commit *": "allow",
+          "git push origin *": "allow",
+          "gh issue view *": "allow",
+          "gh pr create *": "allow",
+          "gh pr view *": "allow",
+          "gitleaks version": "allow",
+          "gitleaks git *": "allow",
+          "gitleaks dir *": "allow",
+          "bun audit": "allow",
+          "bun audit *": "allow",
+          "bun run lint": "allow",
+          "bun run build": "allow"
         }
       }
     }

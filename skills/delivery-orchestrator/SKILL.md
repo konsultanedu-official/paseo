@@ -47,6 +47,47 @@ For every worker:
 8. Leave `notifyOnFinish` enabled.
 9. Give each worker one phase only.
 
+### Agent-scoped create_agent contract
+
+The Orchestrator is itself an agent, so every worker launch is an **agent-scoped** `create_agent` call.
+
+Use only these top-level fields in the worker launch payload:
+
+- `title`
+- `provider`
+- `labels` when needed
+- `settings`
+- `initialPrompt`
+- `workspaceId`
+- `notifyOnFinish`
+
+**Never pass `background` from the Orchestrator.** `background` exists only on the top-level MCP create-agent schema. Agent-scoped creation is asynchronous by default and returns immediately; `notifyOnFinish: true` is the correct way to receive completion/error/permission notifications.
+
+Canonical worker launch shape:
+
+```json
+{
+  "title": "Plan Issue #123",
+  "provider": "opencode/9router/paseo-plan",
+  "settings": {
+    "modeId": "plan"
+  },
+  "initialPrompt": "Plan phase only ...",
+  "workspaceId": "wks_...",
+  "notifyOnFinish": true
+}
+```
+
+Omit absent optional settings instead of inventing defaults. Do not add undocumented keys.
+
+If any Paseo tool returns a schema/validation error such as `unrecognized_keys`, `invalid_type`, or `too_small`:
+
+1. Stop retrying the same payload.
+2. Read the returned validation error.
+3. Remove or correct the invalid field.
+4. Retry at most once with the corrected payload.
+5. If the corrected call still fails, report the tooling blocker instead of looping.
+
 Never hot-swap the parent's provider to imitate another role.
 
 ## Default gated pipeline

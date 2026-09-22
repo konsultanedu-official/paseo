@@ -102,6 +102,29 @@
         "edit": false,
         "bash": false
       }
+    },
+    "orchestrator": {
+      "description": "Coordinates multi-stage delivery by delegating each phase to fresh Paseo agents. Must not modify source directly.",
+      "mode": "primary",
+      "model": "9router/cx/gpt-6-astra",
+      "tools": {
+        "write": false,
+        "edit": false
+      },
+      "permission": {
+        "edit": "deny",
+        "task": "deny",
+        "external_directory": "deny",
+        "bash": {
+          "*": "deny",
+          "git status": "allow",
+          "git status *": "allow",
+          "git diff": "allow",
+          "git diff *": "allow",
+          "git log": "allow",
+          "git log *": "allow"
+        }
+      }
     }
   }
 }

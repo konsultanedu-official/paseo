@@ -113,37 +113,71 @@ let currentProfiles = Array.isArray(config.daemon.agentProfiles)
   ? config.daemon.agentProfiles
   : [];
 
-// Remove profiles that belonged to the old QA/Security/Orchestrator split,
-// plus the old Review profile so it can be replaced deterministically below.
+// Replace the old split-role profile set deterministically with four user-facing
+// profiles: Explore, Plan, Build, Review.
 const retiredProviders = new Set([
   "opencode-qa",
   "opencode-security",
   "opencode-orchestrator"
 ]);
+const managedProfileNames = new Set([
+  "Explore",
+  "Plan",
+  "Build",
+  "Review",
+  "QA",
+  "Security",
+  "Orchestrator"
+]);
 currentProfiles = currentProfiles.filter((profile) => {
   if (!profile || typeof profile !== "object") return true;
   if (retiredProviders.has(profile.provider)) return false;
-  if (profile.id === "konsultanedu-delivery-orchestrator") return false;
-  if (profile.id === "konsultanedu-review-audit") return false;
-  if (profile.name === "Review") return false;
+  if (managedProfileNames.has(profile.name)) return false;
+  if (typeof profile.id === "string" && profile.id.startsWith("konsultanedu-")) return false;
   return true;
 });
 
-const reviewModel = (process.env.OPENCODE_CONFIG ?? "").endsWith("opencode.vps.json")
-  ? "9router/paseo-review"
-  : "9router/cx/gpt-5.6-sol-review";
+const isVps = (process.env.OPENCODE_CONFIG ?? "").endsWith("opencode.vps.json");
+const managedProfiles = [
+  {
+    id: "konsultanedu-explore",
+    name: "Explore",
+    provider: "opencode",
+    model: isVps ? "9router/paseo-fast" : "9router/ag/gemini-3.8-flash-low",
+    modeId: "explore",
+    notes:
+      "Ask/explore/read-only investigation in the persistent Dev session. Use for questions, repository discovery, and low-cost exploration."
+  },
+  {
+    id: "konsultanedu-plan",
+    name: "Plan",
+    provider: "opencode",
+    model: isVps ? "9router/paseo-plan" : "9router/cx/gpt-6-astra",
+    modeId: "plan",
+    notes:
+      "Read-only planning in the same Dev session. Produce implementation scope and acceptance criteria before Build."
+  },
+  {
+    id: "konsultanedu-build",
+    name: "Build",
+    provider: "opencode",
+    model: isVps ? "9router/paseo-build" : "9router/cx/gpt-5.6-sol",
+    modeId: "build",
+    notes:
+      "Implementation mode in the persistent Dev session. Edit source, run build/lint, and leave final changes ready for independent Review."
+  },
+  {
+    id: "konsultanedu-review-audit",
+    name: "Review",
+    provider: "opencode-audit",
+    model: isVps ? "9router/paseo-review" : "9router/cx/gpt-5.6-sol-review",
+    modeId: "review",
+    notes:
+      "Independent Audit session. Load review-delivery: functional/browser QA, security scans, diff/code review, then commit, push, and Draft PR only when every gate passes. Never edit source files."
+  }
+];
 
-currentProfiles.push({
-  id: "konsultanedu-review-audit",
-  name: "Review",
-  provider: "opencode-audit",
-  model: reviewModel,
-  modeId: "review",
-  notes:
-    "Independent Audit session: run functional/browser QA, security scans, diff/code review, then checkpoint commit, push, and Draft PR only after every gate passes. Never edit source files."
-});
-
-config.daemon.agentProfiles = currentProfiles;
+config.daemon.agentProfiles = [...currentProfiles, ...managedProfiles];
 
 fs.writeFileSync(path, JSON.stringify(config, null, 2) + "\n");
 NODE

@@ -24,10 +24,11 @@ console.error(`paseo-readonly MCP connecting to ${daemonUrl}`);
 await paseo.connect();
 console.error("paseo-readonly MCP connected to Paseo daemon");
 
-const server = new McpServer({
-  name: "paseo-readonly",
-  version: "0.1.0",
-});
+function createMcpServer() {
+  const server = new McpServer({
+    name: "paseo-readonly",
+    version: "0.1.0",
+  });
 
 function json(value: unknown) {
   return {
@@ -231,12 +232,8 @@ server.registerTool(
   },
 );
 
-const transport = new WebStandardStreamableHTTPServerTransport({
-  sessionIdGenerator: undefined,
-  enableJsonResponse: true,
-});
-
-await server.connect(transport);
+  return server;
+}
 
 Bun.serve({
   hostname: host,
@@ -256,7 +253,18 @@ Bun.serve({
       return new Response("Not Found", { status: 404 });
     }
 
-    return transport.handleRequest(request);
+    const server = createMcpServer();
+    const transport = new WebStandardStreamableHTTPServerTransport({
+      sessionIdGenerator: undefined,
+      enableJsonResponse: true,
+    });
+
+    await server.connect(transport);
+    try {
+      return await transport.handleRequest(request);
+    } finally {
+      await server.close();
+    }
   },
 });
 

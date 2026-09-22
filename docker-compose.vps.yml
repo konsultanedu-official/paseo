@@ -88,6 +88,18 @@ services:
       - no-new-privileges:true
     cap_drop:
       - ALL
+    healthcheck:
+      test:
+        - CMD
+        - bun
+        - -e
+        - |
+          const response = await fetch("http://127.0.0.1:3000/healthz");
+          if (!response.ok) process.exit(1);
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
 
 
 volumes:

@@ -22,6 +22,7 @@ Use multiple evidence types and keep them distinct:
 
 2. **Secret scanning**
    - Verify Gitleaks is available with `gitleaks version`.
+   - For uncommitted working-tree review in the consolidated Audit workflow, run `gitleaks dir --redact --no-banner .` when that command is permitted.
    - For committed repository history, run `gitleaks git --redact --no-banner`.
    - Never disable redaction.
    - Treat scanner findings as evidence to investigate, not automatic proof of exploitable exposure.
@@ -40,7 +41,7 @@ Use multiple evidence types and keep them distinct:
 
 ## Rules
 
-- Never create, edit, delete, commit, push, merge, or deploy.
+- During the security-review phase itself, never create, edit, delete, commit, push, merge, or deploy. A higher-level Audit workflow may perform checkpoint/delivery only after this security phase and the other review gates have passed.
 - Never use generic Paseo terminal/control-plane tools during security review.
 - Run shell checks as separate tool calls. Do not chain allowed commands with `&&`, `;`, pipes, command substitution, or shell redirection, because the Security mode intentionally matches a narrow command allowlist.
 - Never use a workaround if a blocked command would be required.

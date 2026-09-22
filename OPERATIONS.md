@@ -95,66 +95,40 @@ The repository ships separate OpenCode profiles so the experimental homeserver a
 
 `docker-compose.yml` pins the homeserver to the homelab profile. `docker-compose.vps.yml` pins the VPS to the VPS profile. The generic `opencode.json` remains packaged for backward compatibility but is not selected by either compose profile.
 
+## Two-session delivery workflow
 
-## Single-agent delivery orchestration
-
-The VPS profile includes a managed **Orchestrator** entry point for multi-stage delivery. The human starts one Orchestrator agent; it keeps its own provider/session while spawning fresh child agents for provider-bound phases in the appropriate workspace.
-
-Managed runtime pieces:
-
-- Paseo provider alias: `opencode-orchestrator`.
-- OpenCode mode: `orchestrator`.
-- Agent profile: `Orchestrator` (managed id `konsultanedu-delivery-orchestrator`).
-- Global skill: `delivery-orchestrator`.
-
-The pipeline is:
+The VPS delivery workflow intentionally uses two persistent agent sessions rather than one session per phase.
 
 ```text
-Orchestrator
-  -> Plan agent
-  -> feature worktree
-  -> Build agent
-  -> QA agent
-  -> checkpoint Build agent
-  -> Security agent
-  -> Review agent
-  -> Delivery Build agent
-  -> Draft PR
+DEV SESSION — OpenCode
+  Explore -> Plan -> Build
+  source editing lives here
+
+AUDIT SESSION — OpenCode Audit
+  Review
+    -> functional/browser QA
+    -> security scanning
+    -> diff/code review
+    -> checkpoint commit
+    -> push feature branch
+    -> Draft PR
 ```
 
-Role changes are intentionally fresh Paseo agents rather than provider hot-swaps. This preserves the QA and Security provider boundaries while removing the need for the human to click **New Agent** between normal phases.
+Visible profiles are intentionally simple:
 
-The Orchestrator itself is not an implementation agent. Its OpenCode mode denies source edits, native task delegation, external-directory access, and general shell execution. Its Paseo provider policy disables terminals, browser actions, schedules, permission responses, destructive agent/workspace management, and workspace-script control. It retains only the workspace/agent delegation and discovery surface needed to coordinate workers. Paseo currently expresses this policy as a denylist, so revalidate the Orchestrator tool surface after significant Paseo upgrades.
+- `Explore` — ask/explore/read work using the normal OpenCode provider.
+- `Plan` — read-only planning using the normal OpenCode provider.
+- `Build` — implementation using the normal OpenCode provider.
+- `Review` — independent audit/delivery using the restricted `opencode-audit` provider.
 
-If a worker needs a permission that cannot be avoided, the Orchestrator may report the pending request but must not approve it itself.
+Explore, Plan, and Build can be reused in one Dev session because they share the same provider. Review is a separate Audit session/provider so the code author and the auditor remain separated.
 
-The managed profile is upserted by `paseo-runtime-entrypoint.sh` without replacing unrelated user-created agent profiles. Its model follows the active OpenCode runtime profile:
+The Review profile replaces the previous QA, Security, and standalone Review profiles. It loads the `review-delivery` skill and performs gates in order: functional/browser QA, security, code/diff review, then delivery only when all gates pass.
 
-- VPS: `9router/paseo-plan`
-- homelab/generic: `9router/cx/gpt-6-astra`
+The Audit provider cannot edit source files. It may use browser QA tools, deterministic security scanners, read-only Git inspection, and a narrow Git/GitHub delivery allowlist for staging the already-reviewed diff, committing it, pushing the feature branch, and opening a Draft PR. This is intentionally a weaker boundary than a fully separate Security provider, but it preserves the important separation between source authoring and independent audit while keeping the workflow to two sessions.
 
-After rebuilding/recreating Paseo, verify only the non-secret profile/provider metadata:
+If Review finds a defect, it must stop before commit/push/PR and return the finding to the Dev session. After Dev changes source, rerun the invalidated Review gates on the new diff.
 
-```bash
-docker compose -f docker-compose.vps.yml exec -T paseo \
-  gosu paseo node -e '
-    const fs = require("fs");
-    const c = JSON.parse(fs.readFileSync("/home/paseo/.paseo/config.json", "utf8"));
-    const p = c.agents?.providers?.["opencode-orchestrator"];
-    const a = (c.daemon?.agentProfiles ?? []).find((x) => x.id === "konsultanedu-delivery-orchestrator");
-    console.log({ provider: p?.label, profile: a?.name, model: a?.model, modeId: a?.modeId });
-  '
-```
+The old `opencode-qa`, `opencode-security`, and `opencode-orchestrator` providers are removed at container startup, as are their managed profiles. The OpenCode bridge workaround for orchestrator child-agent creation is no longer part of the image.
 
-Expected shape:
-
-```text
-{
-  provider: 'OpenCode Orchestrator',
-  profile: 'Orchestrator',
-  model: '9router/paseo-plan',
-  modeId: 'orchestrator'
-}
-```
-
-Then start a new **Orchestrator** agent and ask it to run a delivery pipeline for an issue. The normal path should not require manually creating Plan, Build, QA, Security, Review, or Delivery tabs; those appear automatically as Paseo subagents/workspace tabs.
+The pipeline still ends at a **Draft PR**. Human/ChatGPT external audit and merge remain separate decisions.

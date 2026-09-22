@@ -63,10 +63,18 @@ const config = JSON.parse(raw);
 
 config.agents ??= {};
 config.agents.providers ??= {};
-config.agents.providers["opencode-qa"] = {
+
+// Remove the superseded split-role providers. The delivery workflow now uses
+// one normal OpenCode Dev session and one restricted OpenCode Audit session.
+delete config.agents.providers["opencode-qa"];
+delete config.agents.providers["opencode-security"];
+delete config.agents.providers["opencode-orchestrator"];
+
+config.agents.providers["opencode-audit"] = {
   extends: "opencode",
-  label: "OpenCode QA",
-  description: "OpenCode with a restricted Paseo tool catalog for runtime and browser QA.",
+  label: "OpenCode Audit",
+  description:
+    "Independent audit/delivery provider for browser QA, security scanning, code review, and Draft PR delivery without source editing.",
   paseoTools: {
     enabled: true,
     disabledTools: [
@@ -100,105 +108,41 @@ config.agents.providers["opencode-qa"] = {
   }
 };
 
-
-config.agents.providers["opencode-security"] = {
-  extends: "opencode",
-  label: "OpenCode Security",
-  description: "OpenCode for read-only security review with no Paseo control-plane tools.",
-  paseoTools: {
-    enabled: false
-  }
-};
-
-config.agents.providers["opencode-orchestrator"] = {
-  extends: "opencode",
-  label: "OpenCode Orchestrator",
-  description:
-    "OpenCode coordinator that delegates delivery phases to fresh Paseo agents without editing source directly.",
-  paseoTools: {
-    enabled: true,
-    // Paseo currently exposes a denylist policy rather than a positive allowlist.
-    // Keep the orchestrator limited to workspace/agent delegation and read-only
-    // discovery; workers retain their own provider-specific boundaries.
-    disabledTools: [
-      "speak",
-      "archive_workspace",
-      "archive_agent",
-      "kill_agent",
-      "update_agent",
-      "rename_workspace",
-      "list_workspace_scripts",
-      "start_workspace_script",
-      "stop_workspace_script",
-      "list_terminals",
-      "create_terminal",
-      "kill_terminal",
-      "capture_terminal",
-      "send_terminal_keys",
-      "create_schedule",
-      "create_heartbeat",
-      "delete_heartbeat",
-      "list_schedules",
-      "inspect_schedule",
-      "pause_schedule",
-      "resume_schedule",
-      "delete_schedule",
-      "update_schedule",
-      "schedule_logs",
-      "run_schedule_once",
-      "set_agent_mode",
-      "respond_to_permission",
-      "browser_list_tabs",
-      "browser_new_tab",
-      "browser_snapshot",
-      "browser_click",
-      "browser_fill",
-      "browser_wait",
-      "browser_type",
-      "browser_keypress",
-      "browser_navigate",
-      "browser_back",
-      "browser_forward",
-      "browser_reload",
-      "browser_screenshot",
-      "browser_upload",
-      "browser_hover",
-      "browser_select",
-      "browser_drag",
-      "browser_logs",
-      "browser_evaluate",
-      "browser_scroll",
-      "browser_resize",
-      "browser_close_tab"
-    ]
-  }
-};
-
-
 config.daemon ??= {};
-const currentProfiles = Array.isArray(config.daemon.agentProfiles)
+let currentProfiles = Array.isArray(config.daemon.agentProfiles)
   ? config.daemon.agentProfiles
   : [];
-const orchestratorModel = (process.env.OPENCODE_CONFIG ?? "").endsWith("opencode.vps.json")
-  ? "9router/paseo-plan"
-  : "9router/cx/gpt-6-astra";
-const orchestratorProfile = {
-  id: "konsultanedu-delivery-orchestrator",
-  name: "Orchestrator",
-  provider: "opencode-orchestrator",
-  model: orchestratorModel,
-  modeId: "orchestrator",
+
+// Remove profiles that belonged to the old QA/Security/Orchestrator split,
+// plus the old Review profile so it can be replaced deterministically below.
+const retiredProviders = new Set([
+  "opencode-qa",
+  "opencode-security",
+  "opencode-orchestrator"
+]);
+currentProfiles = currentProfiles.filter((profile) => {
+  if (!profile || typeof profile !== "object") return true;
+  if (retiredProviders.has(profile.provider)) return false;
+  if (profile.id === "konsultanedu-delivery-orchestrator") return false;
+  if (profile.id === "konsultanedu-review-audit") return false;
+  if (profile.name === "Review") return false;
+  return true;
+});
+
+const reviewModel = (process.env.OPENCODE_CONFIG ?? "").endsWith("opencode.vps.json")
+  ? "9router/paseo-review"
+  : "9router/cx/gpt-5.6-sol-review";
+
+currentProfiles.push({
+  id: "konsultanedu-review-audit",
+  name: "Review",
+  provider: "opencode-audit",
+  model: reviewModel,
+  modeId: "review",
   notes:
-    "Single entry point for multi-stage delivery. Delegate Plan, Build, QA, Security, Review, checkpoint, and Delivery to fresh Paseo agents/workspaces; never edit source, merge main, or bypass a failed gate."
-};
-const existingOrchestratorIndex = currentProfiles.findIndex(
-  (profile) => profile?.id === orchestratorProfile.id
-);
-if (existingOrchestratorIndex >= 0) {
-  currentProfiles[existingOrchestratorIndex] = orchestratorProfile;
-} else {
-  currentProfiles.push(orchestratorProfile);
-}
+    "Independent Audit session: run functional/browser QA, security scans, diff/code review, then checkpoint commit, push, and Draft PR only after every gate passes. Never edit source files."
+});
+
 config.daemon.agentProfiles = currentProfiles;
 
 fs.writeFileSync(path, JSON.stringify(config, null, 2) + "\n");
